@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import statistics as stat
 import random
 
-POPULATION_SIZE = 10
+POPULATION_SIZE = 12
 GENERATIONS = [50, 100, 200]
-CROSSOVER_RATE = [0.1, 0.5, 0.9]
-MUTATION_RATE = [0.1, 0.2, 0.5]
+CROSSOVER_RATE = [0.5, 0.8, 0.95]
+MUTATION_RATE = [0.01, 0.1, 0.2]
 X_RANGE = (-1, 21)
 BIN_LENGTH = len(bin(X_RANGE[1])[2:])
 
