@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 import statistics as stat
 import random
 
-POPULATION_SIZE = 12
-GENERATIONS = [50, 100, 200]
-CROSSOVER_RATE = [0.5, 0.8, 0.95]
-MUTATION_RATE = [0.01, 0.1, 0.2]
+POPULATION_SIZE = 4
+GENERATIONS = [50, 100, 250]
+CROSSOVER_RATE = [0.01, 0.6, 0.95]
+MUTATION_RATE = [0.01, 0.1, 0.6]
 X_RANGE = (-1, 21)
-BIN_LENGTH = len(bin(X_RANGE[1])[2:])
+BIN_LENGTH = len(bin(X_RANGE[1])[2:]) + 1 # 2's complement => 1 bit for sign
 
 def fitness_fun(x):
     return -0.25 * x**2 + 5 * x + 6
@@ -25,7 +25,6 @@ def bin_to_int(binary_str):
     else:
         return int(binary_str, 2)
 
-
 def create_first_population(population_size, x_range):
     return [np.random.randint(x_range[0], x_range[1]) for _ in range(population_size)]
 
@@ -38,6 +37,9 @@ def roulette_selection(population, population_fitness):
         # shift fitness values to be non-negative => it will be easier to work with them
         population_fitness = [x - min_fitness for x in population_fitness]
     fitness_sum = sum(population_fitness)
+    # if fitness sum is 0, all fitness values are 0 => all probabilities are 0 => all individuals are equally likely to be selected
+    if fitness_sum == 0:
+        return population
     probabilities = [x / fitness_sum for x in population_fitness]
     selected_population = []
     for _ in range(len(population)):
@@ -58,6 +60,7 @@ def crossover(parents, crossover_rate):
             crossover_point = random.randint(0, BIN_LENGTH - 1)
             children1 = bin_to_int(parents[i][:crossover_point] + parents[i + 1][crossover_point:])
             children2 = bin_to_int(parents[i + 1][:crossover_point] + parents[i][crossover_point:])
+            # check if after crossover children are still in the range, else return original parents
             if children1 >= X_RANGE[0] and children1 <= X_RANGE[1] and children2 >= X_RANGE[0] and children2 <= X_RANGE[1]:
                 children.append(children1)
                 children.append(children2)
@@ -134,9 +137,12 @@ for generation in GENERATIONS:
             ax.plot(avg_fitness, label='Average Fitness')
             ax.plot(max_fitness, label='Max Fitness')
             ax.set_title(f"CR: {crossover_rate}, MR: {mutation_rate}")
+            #make xlabel be more above x axis
+            ax.xaxis.set_label_coords(0.5, -0.15)
             ax.set_xlabel("Generation")
             ax.set_ylabel("Fitness")
             ax.legend()
+            ax.tick_params(axis='x', rotation=45)
 
             final_max_fitness = max_fitness[-1]
             ax.text(generation - 1, final_max_fitness, f"{final_max_fitness:.2f}", 
@@ -145,5 +151,3 @@ for generation in GENERATIONS:
     plt.suptitle(f"Results for Generations: {generation}")
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.show()
-
-
